@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Bill from '../models/bill.js';
+import Bill from '../models/Bill.js';
 import Product from "../models/product.js";
 
 export const getForecast = async (req, res) => {
