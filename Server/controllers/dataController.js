@@ -64,7 +64,7 @@ export const uploadCSV = async (req, res) => {
 
     await Bill.insertMany(validData);
 
-    // Optional: Notify ML service to retrain
+    
     try {
       await axios.get('http://localhost:8000/train');
     } catch (trainErr) {

@@ -5,6 +5,9 @@ import axios from 'axios';
 const Login = () => {
   const navigate = useNavigate();
 
+  // ✅ Use VITE_API_URL or fallback to localhost in dev
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [showReset, setShowReset] = useState(false);
@@ -18,7 +21,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form);
+      const res = await axios.post(`${API_URL}/auth/login`, form);
       localStorage.setItem('token', res.data.token);
       navigate('/dashboard');
     } catch (err) {

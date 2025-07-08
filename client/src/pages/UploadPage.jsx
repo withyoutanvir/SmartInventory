@@ -5,13 +5,17 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState("");
 
-  const { triggerRefresh } = useDataRefresh();  
+  const { triggerRefresh } = useDataRefresh();
+
+  // ✅ Use .env or fallback to localhost during development
+  const AI_API_URL =
+    import.meta.env.VITE_AI_URL || "http://localhost:5000";
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && file.type === "text/csv") {
       setSelectedFile(file);
-      setMessage(""); 
+      setMessage("");
     } else {
       setSelectedFile(null);
       setMessage("❌ Please upload a valid CSV file.");
@@ -28,7 +32,7 @@ export default function UploadPage() {
     formData.append("csvFile", selectedFile);
 
     try {
-      const res = await fetch("http://localhost:5000/api/data/upload", {
+      const res = await fetch(`${AI_API_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -37,7 +41,7 @@ export default function UploadPage() {
         const json = await res.json();
         setMessage(`✅ ${json.message} (${json.count} rows)`);
         setSelectedFile(null);
-        triggerRefresh(); // Triggering Dashboard refresh
+        triggerRefresh();
       } else {
         setMessage("❌ Upload failed. Server error.");
       }

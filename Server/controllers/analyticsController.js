@@ -1,6 +1,6 @@
 import Bill from '../models/Bill.js';
 
-// GET /api/analytics/top-skus
+
 export const getTopSKUs = async (req, res) => {
   try {
     const pipeline = [
@@ -23,7 +23,7 @@ export const getTopSKUs = async (req, res) => {
   }
 };
 
-// GET /api/analytics/daily-sales
+
 export const getDailySales = async (req, res) => {
   try {
     const pipeline = [
@@ -51,7 +51,7 @@ export const getDailySales = async (req, res) => {
   }
 };
 
-// GET /api/analytics/summary
+
 export const getSummary = async (req, res) => {
   try {
     const totalSalesAgg = await Bill.aggregate([
@@ -85,7 +85,6 @@ export const getSummary = async (req, res) => {
   }
 };
 
-// ✅ COMBINED: GET /api/analytics
 export const getAnalyticsCombined = async (req, res) => {
   try {
     // Summary part
@@ -112,7 +111,7 @@ export const getAnalyticsCombined = async (req, res) => {
       revenue: totalSales,
       orders: ordersCount,
       topProduct: topSKU[0]?._id || 'N/A',
-      revenueGrowth: '+12%' // Optional static
+      revenueGrowth: '+12%' 
     };
 
     // Trend data

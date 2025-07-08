@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL|| 'http://localhost:5000/api';
+
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -20,10 +22,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', form);
+      const res = await axios.post(`${API_URL}/auth/register`, form);
       localStorage.setItem('token', res.data.token);
-     navigate('/login', { state: { success: "Registration successful. Please log in." } });
-
+      navigate('/login', { state: { success: "Registration successful. Please log in." } });
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     }
@@ -39,9 +40,9 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="username"                          
+            name="username"
             placeholder="Username"
-            value={form.username}                  
+            value={form.username}
             onChange={handleChange}
             required
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"

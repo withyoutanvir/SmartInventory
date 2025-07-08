@@ -12,7 +12,7 @@ const billSchema = new mongoose.Schema({
   items: [itemSchema],
 });
 
-// ✅ Avoid OverwriteModelError
+
 const Bill = mongoose.models.Bill || mongoose.model('Bill', billSchema);
 
 export default Bill;
