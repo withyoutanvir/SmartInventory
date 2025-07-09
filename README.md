@@ -23,7 +23,7 @@ Current inventory systems in retail giants like Walmart or Amazon often:
 
 ## 🚀 Live Demo
 
-🔗 [Click here to try Smart Inventory](https://health-ai-6f9n.vercel.app/)
+🔗 [Click here to try Smart Inventory](smartinventory0.netlify.app/)
 
 ## 🧩 Features
 
