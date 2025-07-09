@@ -34,12 +34,6 @@ Current inventory systems in retail giants like Walmart or Amazon often:
 
 ---
 
-## 📷 Screenshots
-
-> (Add images here of dashboard, product detail page, low stock alert, etc.)
-
----
-
 ## 🏗️ Tech Stack
 
 | Layer       | Technology                   |
@@ -80,13 +74,12 @@ The AI model predicts product demand using:
 - Seasonality & trends
 - External factors (optional: promotions, weather, etc.)
 
-Model: Gradient Boosting or LSTM (for time series)
+Model: prophet
 
 Outputs:
 
-- Predicted demand per product
-- Reorder timing suggestions
-- Overstock warnings
+- Dashboard Showcasing future prediction.
+- Total Sales, trending SKU
 
 ---
 
