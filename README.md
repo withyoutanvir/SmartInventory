@@ -3,7 +3,8 @@
  # 🧠 Smart Inventory - AI-Powered Store-Level Inventory Management
 
 Smart Inventory is an intelligent, real-time inventory and analytics system designed to empower retail stores with precise demand forecasting, smart restocking suggestions, and deep store-level analytics. Unlike traditional systems used by companies like Walmart, our solution focuses on automation, predictive AI, and operational visibility at the **individual store level**.
-
+### System Design
+![System](./assets/System.png)
 ## 🚀 Why Smart Inventory?
 
 Current inventory systems in retail giants like Walmart or Amazon often:
