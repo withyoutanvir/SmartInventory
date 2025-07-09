@@ -108,14 +108,15 @@ PORT=5000
 ## Start Command
 npm start
 
-### Front-end Setup
+## Front-end Setup
 cd frontend
 npm install
 npm run dev
 
-###  AI Microservice
+##  AI Microservice
 
 cd ai_microservice
 pip install -r requirements.txt
 python model_server.py
 ---
+
