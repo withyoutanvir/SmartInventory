@@ -45,7 +45,7 @@ Current inventory systems in retail giants like Walmart or Amazon often:
 | Frontend   | React.js + Tailwind CSS      |
 | Backend    | Node.js + Express.js         |
 | Database   | MongoDB                      |
-| AI Layer   | Python (scikit-learn / XGBoost)  
+| AI Layer   | Python (scikit-learn )  
 | Messaging  | Email / SMS using Twilio/SendGrid  
 | Auth       | JWT + Role-based Access      |
 | Deployment | Render / Vercel / MongoDB Atlas |
@@ -92,21 +92,22 @@ Outputs:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/withyoutanvir/smart-inventory.git
-cd smart-inventory
-cd backend
+git clone https://github.com/withyoutanvir/SmartInventory.git
+cd SmartInventory
+cd Server
 npm install
-touch .env
+npm run dev
 ---
-## Add this to your env
+## Add this to your .env
 MONGO_URI=your_mongo_connection
 JWT_SECRET=your_jwt_secret
 PORT=5000
+
 ## Start Command
 npm start
 
 ## Front-end Setup
-cd frontend
+cd client
 npm install
 npm run dev
 
@@ -114,6 +115,6 @@ npm run dev
 
 cd ai_microservice
 pip install -r requirements.txt
-python model_server.py
+python main.py
 ---
 
