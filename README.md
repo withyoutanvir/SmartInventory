@@ -117,6 +117,7 @@ cd ai_microservice
 pip install -r requirements.txt
 python main.py
 ---
+```
 ## 📄 License
 ``` bash
 MIT License
