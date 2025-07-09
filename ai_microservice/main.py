@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from prophet import Prophet
@@ -34,40 +34,34 @@ if os.path.exists(MODEL_PATH):
         print(f"⚠️ Failed to load existing model: {e}")
         model = None
 
+# Save model to disk
 def save_model(model):
     os.makedirs("saved_model", exist_ok=True)
     joblib.dump(model, MODEL_PATH)
 
+# Root route
 @app.get("/")
 def root():
     return {"message": "✅ AI microservice is running"}
 
+# Train model from CSV
 @app.get("/train")
 def train():
     try:
         df = pd.read_csv(DATA_PATH)
 
-        # Step 1: Drop rows with missing or invalid fields
         df = df.dropna(subset=['date', 'quantity'])
-
-        # Step 2: Ensure quantity is numeric
         df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce')
-
-        # Step 3: Drop rows with invalid numeric values
         df = df.dropna(subset=['quantity'])
 
-        # Step 4: Group by date and prepare for Prophet
         df_grouped = df.groupby('date').agg({'quantity': 'sum'}).reset_index()
         df_grouped.rename(columns={'date': 'ds', 'quantity': 'y'}, inplace=True)
-
-        # Step 5: Parse dates safely
         df_grouped['ds'] = pd.to_datetime(df_grouped['ds'], errors='coerce')
         df_grouped = df_grouped.dropna(subset=['ds'])
 
         if df_grouped.empty:
             raise HTTPException(status_code=400, detail="No valid rows to train the model.")
 
-        # Train model
         new_model = Prophet()
         new_model.fit(df_grouped)
 
@@ -80,6 +74,7 @@ def train():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Training failed: {str(e)}")
 
+# Predict future demand
 @app.get("/predict")
 def predict(sku: str = Query(...), days: int = Query(7)):
     if not model:
@@ -94,6 +89,7 @@ def predict(sku: str = Query(...), days: int = Query(7)):
         "forecast": result
     }
 
+# Reorder quantity suggestion
 class StockRequest(BaseModel):
     sku: str
     current_stock: int
@@ -114,6 +110,7 @@ def reorder(data: StockRequest):
         "recommended_restock_qty": recommended_qty
     }
 
+# Forecast accuracy (MAPE)
 @app.get("/forecast_accuracy")
 def forecast_accuracy():
     if not model:
@@ -140,7 +137,44 @@ def forecast_accuracy():
 
     return {"forecast_accuracy_percent": round(accuracy, 2)}
 
-# Optional CLI support
+# Upload new sales.csv and retrain model
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        os.makedirs("data", exist_ok=True)
+
+        # Save uploaded file
+        with open(DATA_PATH, "wb") as f:
+            f.write(await file.read())
+
+        # Load and validate data
+        df = pd.read_csv(DATA_PATH)
+        df = df.dropna(subset=['date', 'quantity'])
+        df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce')
+        df = df.dropna(subset=['quantity'])
+
+        df_grouped = df.groupby('date').agg({'quantity': 'sum'}).reset_index()
+        df_grouped.rename(columns={'date': 'ds', 'quantity': 'y'}, inplace=True)
+        df_grouped['ds'] = pd.to_datetime(df_grouped['ds'], errors='coerce')
+        df_grouped = df_grouped.dropna(subset=['ds'])
+
+        if df_grouped.empty:
+            raise HTTPException(status_code=400, detail="Uploaded file is invalid for training.")
+
+        # Train and save new model
+        new_model = Prophet()
+        new_model.fit(df_grouped)
+
+        save_model(new_model)
+        global model
+        model = new_model
+
+        return {"message": "✅ File uploaded and model retrained", "count": len(df_grouped)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+# CLI entry
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()

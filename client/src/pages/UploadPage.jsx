@@ -7,9 +7,9 @@ export default function UploadPage() {
 
   const { triggerRefresh } = useDataRefresh();
 
-  // ✅ Use .env or fallback to localhost during development
+  // Use environment variable for API base URL or fallback to localhost
   const AI_API_URL =
-    import.meta.env.VITE_AI_URL || "http://localhost:5000";
+    import.meta.env.VITE_AI_URL || "http://localhost:8000";
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -29,7 +29,7 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("csvFile", selectedFile);
+    formData.append("file", selectedFile); // ✅ Match FastAPI key
 
     try {
       const res = await fetch(`${AI_API_URL}/upload`, {
@@ -39,11 +39,13 @@ export default function UploadPage() {
 
       if (res.ok) {
         const json = await res.json();
-        setMessage(`✅ ${json.message} (${json.count} rows)`);
+        const countText = json.count ? ` (${json.count} rows)` : "";
+        setMessage(`✅ ${json.message}${countText}`);
         setSelectedFile(null);
         triggerRefresh();
       } else {
-        setMessage("❌ Upload failed. Server error.");
+        const errorText = await res.text();
+        setMessage(`❌ Upload failed. ${errorText}`);
       }
     } catch (error) {
       setMessage("❌ Upload failed. Check your server connection.");
