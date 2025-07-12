@@ -6,7 +6,7 @@ export default function UploadPage() {
   const [message, setMessage] = useState("");
   const { triggerRefresh } = useDataRefresh();
 
-  // ✅ Automatically uses env var for dev/prod
+  // ✅ Load API URL from environment (.env)
   const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleFileUpload = (e) => {
@@ -27,7 +27,7 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile); // ← multer field must be 'file'
+    formData.append("file", selectedFile); // 🔁 must match multer.single('file')
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/analytics/upload-csv`, {
@@ -37,15 +37,17 @@ export default function UploadPage() {
 
       if (res.ok) {
         const json = await res.json();
-        const countText = json.count ? ` (${json.count} rows)` : "";
-        setMessage(`✅ File uploaded successfully${countText}`);
+        const countText = json.trend?.length
+          ? ` (${json.trend.length} entries)`
+          : "";
+        setMessage(`✅ CSV uploaded successfully${countText}`);
         setSelectedFile(null);
-        triggerRefresh(); // 🔁 Refresh dashboard
+        triggerRefresh(); // 🔁 refresh dashboard data
       } else {
         const errorText = await res.text();
-        setMessage(`❌ Upload failed: ${errorText}`);
+        setMessage(`❌ Upload failed. ${errorText}`);
       }
-    } catch (err) {
+    } catch (error) {
       setMessage("❌ Upload failed. Check your server connection.");
     }
   };

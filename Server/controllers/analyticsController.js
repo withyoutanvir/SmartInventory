@@ -1,9 +1,8 @@
 import fs from 'fs';
 import pkg from 'papaparse';
-import Bill from '../models/Bill.js';
-
 const { parse } = pkg;
 
+import Bill from '../models/Bill.js';
 
 export const getTopSKUs = async (req, res) => {
   try {
@@ -25,13 +24,14 @@ export const getTopSKUs = async (req, res) => {
   }
 };
 
-// 📆 Daily revenue trend
 export const getDailySales = async (req, res) => {
   try {
     const result = await Bill.aggregate([
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
+          },
           total: { $sum: '$total' }
         }
       },
@@ -49,7 +49,6 @@ export const getDailySales = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch daily sales' });
   }
 };
-
 
 export const getSummary = async (req, res) => {
   try {
@@ -76,14 +75,13 @@ export const getSummary = async (req, res) => {
       revenue: totalSales,
       orders: ordersCount,
       topProduct: topSKU[0]?._id || 'N/A',
-      revenueGrowth: '+12%' // optional static
+      revenueGrowth: '+12%' 
     });
   } catch (err) {
     console.error('Summary error:', err.message);
     res.status(500).json({ error: 'Failed to fetch summary' });
   }
 };
-
 
 export const getAnalyticsCombined = async (req, res) => {
   try {
@@ -109,13 +107,15 @@ export const getAnalyticsCombined = async (req, res) => {
       revenue: totalSales,
       orders: ordersCount,
       topProduct: topSKU[0]?._id || 'N/A',
-      revenueGrowth: '+12%' // static for now
+      revenueGrowth: '+12%'
     };
 
     const trendRaw = await Bill.aggregate([
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
+          },
           total: { $sum: '$total' }
         }
       },
@@ -134,15 +134,13 @@ export const getAnalyticsCombined = async (req, res) => {
   }
 };
 
- // 📤 Upload CSV & parse
 export const uploadCSVAndParse = async (req, res) => {
   try {
-    const filePath = req.file?.path;
-    if (!filePath) {
-      return res.status(400).json({ error: "❌ No file uploaded." });
+    const csvContent = req.file?.buffer?.toString('utf8');
+    if (!csvContent) {
+      return res.status(400).json({ error: "❌ CSV file required." });
     }
 
-    const csvContent = fs.readFileSync(filePath, 'utf8');
     const results = parse(csvContent, {
       header: true,
       skipEmptyLines: true
@@ -168,8 +166,6 @@ export const uploadCSVAndParse = async (req, res) => {
       }
     });
 
-    fs.unlinkSync(filePath); // 🧹 remove uploaded file
-
     if (validCount === 0) {
       return res.status(400).json({ error: "❌ All rows invalid. Nothing inserted." });
     }
@@ -179,7 +175,7 @@ export const uploadCSVAndParse = async (req, res) => {
       total,
     }));
 
-    return res.status(200).json({ trend: parsedData, count: validCount });
+    return res.status(200).json({ trend: parsedData });
   } catch (err) {
     console.error("CSV upload error:", err.message);
     return res.status(500).json({ error: "CSV processing failed", details: err.message });

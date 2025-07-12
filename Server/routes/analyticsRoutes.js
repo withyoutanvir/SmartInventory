@@ -1,4 +1,3 @@
-
 import express from 'express';
 import multer from 'multer';
 import {
@@ -10,11 +9,17 @@ import {
 } from '../controllers/analyticsController.js';
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' }); // saves to disk
+
+// ✅ Use in-memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 router.get('/', getAnalyticsCombined);
 router.get('/top-skus', getTopSKUs);
 router.get('/daily-sales', getDailySales);
 router.get('/summary', getSummary);
-router.post('/upload-csv', upload.single('file'), uploadCSVAndParse); 
+
+// ✅ This will pass `req.file.buffer` to controller
+router.post('/upload-csv', upload.single('file'), uploadCSVAndParse);
+
 export default router;
