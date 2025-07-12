@@ -1,3 +1,4 @@
+
 import express from 'express';
 import multer from 'multer';
 import {
@@ -9,12 +10,11 @@ import {
 } from '../controllers/analyticsController.js';
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'uploads/' }); // saves to disk
 
 router.get('/', getAnalyticsCombined);
 router.get('/top-skus', getTopSKUs);
 router.get('/daily-sales', getDailySales);
 router.get('/summary', getSummary);
-router.post('/upload-csv', upload.single('file'), uploadCSVAndParse);
-
+router.post('/upload-csv', upload.single('file'), uploadCSVAndParse); 
 export default router;

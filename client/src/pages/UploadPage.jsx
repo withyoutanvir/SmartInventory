@@ -4,10 +4,9 @@ import { useDataRefresh } from "../context/DataRefreshContext";
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState("");
-
   const { triggerRefresh } = useDataRefresh();
 
-  // ✅ Automatically picks from .env or .env.development
+  // ✅ Automatically uses env var for dev/prod
   const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleFileUpload = (e) => {
@@ -28,10 +27,10 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile); // must match multer's .single("file")
+    formData.append("file", selectedFile); // ← multer field must be 'file'
 
     try {
-      const res = await fetch(`${BACKEND_URL}/data/upload`, {
+      const res = await fetch(`${BACKEND_URL}/api/analytics/upload-csv`, {
         method: "POST",
         body: formData,
       });
@@ -39,14 +38,14 @@ export default function UploadPage() {
       if (res.ok) {
         const json = await res.json();
         const countText = json.count ? ` (${json.count} rows)` : "";
-        setMessage(`✅ ${json.message}${countText}`);
+        setMessage(`✅ File uploaded successfully${countText}`);
         setSelectedFile(null);
-        triggerRefresh(); // 🔁 refresh dashboard data
+        triggerRefresh(); // 🔁 Refresh dashboard
       } else {
         const errorText = await res.text();
-        setMessage(`❌ Upload failed. ${errorText}`);
+        setMessage(`❌ Upload failed: ${errorText}`);
       }
-    } catch (error) {
+    } catch (err) {
       setMessage("❌ Upload failed. Check your server connection.");
     }
   };
@@ -69,7 +68,9 @@ export default function UploadPage() {
         Upload
       </button>
 
-      {message && <p className="mt-4 text-sm text-gray-700">{message}</p>}
+      {message && (
+        <p className="mt-4 text-sm text-gray-700 whitespace-pre-line">{message}</p>
+      )}
     </div>
   );
 }

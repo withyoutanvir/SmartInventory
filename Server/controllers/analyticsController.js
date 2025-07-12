@@ -1,9 +1,8 @@
 import fs from 'fs';
 import pkg from 'papaparse';
-const { parse } = pkg;
-
-
 import Bill from '../models/Bill.js';
+
+const { parse } = pkg;
 
 
 export const getTopSKUs = async (req, res) => {
@@ -26,15 +25,13 @@ export const getTopSKUs = async (req, res) => {
   }
 };
 
-
+// 📆 Daily revenue trend
 export const getDailySales = async (req, res) => {
   try {
     const result = await Bill.aggregate([
       {
         $group: {
-          _id: {
-            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
-          },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
           total: { $sum: '$total' }
         }
       },
@@ -79,7 +76,7 @@ export const getSummary = async (req, res) => {
       revenue: totalSales,
       orders: ordersCount,
       topProduct: topSKU[0]?._id || 'N/A',
-      revenueGrowth: '+12%' 
+      revenueGrowth: '+12%' // optional static
     });
   } catch (err) {
     console.error('Summary error:', err.message);
@@ -112,15 +109,13 @@ export const getAnalyticsCombined = async (req, res) => {
       revenue: totalSales,
       orders: ordersCount,
       topProduct: topSKU[0]?._id || 'N/A',
-      revenueGrowth: '+12%'
+      revenueGrowth: '+12%' // static for now
     };
 
     const trendRaw = await Bill.aggregate([
       {
         $group: {
-          _id: {
-            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
-          },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
           total: { $sum: '$total' }
         }
       },
@@ -139,11 +134,12 @@ export const getAnalyticsCombined = async (req, res) => {
   }
 };
 
+ // 📤 Upload CSV & parse
 export const uploadCSVAndParse = async (req, res) => {
   try {
     const filePath = req.file?.path;
     if (!filePath) {
-      return res.status(400).json({ error: "No file uploaded." });
+      return res.status(400).json({ error: "❌ No file uploaded." });
     }
 
     const csvContent = fs.readFileSync(filePath, 'utf8');
@@ -161,7 +157,6 @@ export const uploadCSVAndParse = async (req, res) => {
       const quantity = parseInt(row.quantity);
       const price = parseFloat(row.price);
 
-      // ✅ Validate
       const isValidDate = date && !isNaN(Date.parse(date));
       const isValidQuantity = !isNaN(quantity) && quantity > 0;
       const isValidPrice = !isNaN(price) && price > 0;
@@ -173,7 +168,7 @@ export const uploadCSVAndParse = async (req, res) => {
       }
     });
 
-    fs.unlinkSync(filePath);
+    fs.unlinkSync(filePath); // 🧹 remove uploaded file
 
     if (validCount === 0) {
       return res.status(400).json({ error: "❌ All rows invalid. Nothing inserted." });
@@ -184,7 +179,7 @@ export const uploadCSVAndParse = async (req, res) => {
       total,
     }));
 
-    return res.status(200).json({ trend: parsedData });
+    return res.status(200).json({ trend: parsedData, count: validCount });
   } catch (err) {
     console.error("CSV upload error:", err.message);
     return res.status(500).json({ error: "CSV processing failed", details: err.message });
