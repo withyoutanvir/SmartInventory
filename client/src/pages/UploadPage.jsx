@@ -31,7 +31,7 @@ export default function UploadPage() {
     formData.append("file", selectedFile); // must match multer's .single("file")
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/data/upload`, {
+      const res = await fetch(`${BACKEND_URL}/data/upload`, {
         method: "POST",
         body: formData,
       });
