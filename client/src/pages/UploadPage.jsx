@@ -42,7 +42,7 @@ export default function UploadPage() {
           : "";
         setMessage(`✅ CSV uploaded successfully${countText}`);
         setSelectedFile(null);
-        triggerRefresh(); // 🔁 refresh dashboard data
+        triggerRefresh(); 
       } else {
         const errorText = await res.text();
         setMessage(`❌ Upload failed. ${errorText}`);

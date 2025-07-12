@@ -5,8 +5,9 @@ import axios from 'axios';
 
 export default function Login() {
   const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
-  const navigate = useNavigate();
+  console.log('🌐 API_URL used:', API_URL); // ✅ Confirm .env is working
 
+  const navigate = useNavigate();
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,11 +21,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
+    console.log('📦 Submitting login to:', `${API_URL}/auth/login`);
+    console.log('🧾 Payload:', form);
+
     try {
       const res = await axios.post(`${API_URL}/auth/login`, form);
+      console.log('✅ Login success:', res.data);
       localStorage.setItem('token', res.data.token);
       navigate('/dashboard');
     } catch (err) {
+      console.error('❌ Login error:', err);
       setError(err.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
@@ -93,7 +99,6 @@ export default function Login() {
           </button>
         </form>
 
-        {/* ✅ Register link */}
         <p className="text-center text-sm text-gray-400 mt-6">
           Don’t have an account?{' '}
           <Link to="/register" className="text-cyan-400 hover:underline">
