@@ -7,9 +7,8 @@ export default function UploadPage() {
 
   const { triggerRefresh } = useDataRefresh();
 
-  // Use environment variable for API base URL or fallback to localhost
-  const AI_API_URL =
-    import.meta.env.VITE_AI_URL || "http://localhost:8000";
+  // 👉 Update to target your Express backend
+  const BACKEND_URL = "http://localhost:5000"; 
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -29,10 +28,10 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile); // ✅ Match FastAPI key
+    formData.append("file", selectedFile); // must match multer's field name
 
     try {
-      const res = await fetch(`${AI_API_URL}/upload`, {
+      const res = await fetch(`${BACKEND_URL}/api/data/upload`, {
         method: "POST",
         body: formData,
       });
@@ -42,7 +41,7 @@ export default function UploadPage() {
         const countText = json.count ? ` (${json.count} rows)` : "";
         setMessage(`✅ ${json.message}${countText}`);
         setSelectedFile(null);
-        triggerRefresh();
+        triggerRefresh(); // 🔁 trigger dashboard refresh
       } else {
         const errorText = await res.text();
         setMessage(`❌ Upload failed. ${errorText}`);
@@ -54,7 +53,7 @@ export default function UploadPage() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">📤 Upload CSV to AI Microservice</h1>
+      <h1 className="text-2xl font-bold mb-4">📤 Upload CSV to Inventory System</h1>
 
       <input
         type="file"

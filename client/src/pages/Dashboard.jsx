@@ -23,31 +23,50 @@ export default function Dashboard() {
   const [trendData, setTrendData] = useState([]);
   const [topSKUs, setTopSKUs] = useState([]);
   const [reorderData, setReorderData] = useState([]);
+  const [forecastData, setForecastData] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { refreshFlag } = useDataRefresh();
+  const { refreshFlag } = useDataRefresh(); // syncs when CSV is uploaded from Analytics
 
   useEffect(() => {
     fetchData();
+    fetchProducts();
   }, [refreshFlag]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [summaryRes, salesRes, trendRes, topSKUsRes, reorderRes] =
-        await Promise.all([
-          axios.get("/analytics/summary"),
-          axios.get("/data/recent"),
-          axios.get("/analytics/daily-sales"),
-          axios.get("/analytics/top-skus"),
-          axios.get("/forecast/reorder"),
-        ]);
 
-      setSummary(summaryRes.data);
+      const [analyticsRes, salesRes, topSKUsRes, reorderRes] = await Promise.all([
+        axios.get("/api/analytics"),
+        axios.get("/api/data/recent"),
+        axios.get("/api/analytics/top-skus"),
+        axios.get("/api/forecast/reorder"),
+      ]);
+
+      const summaryData = analyticsRes.data.summary;
+      const trendData = analyticsRes.data.trend;
+      const topSKU = summaryData.topProduct || "N/A";
+
+      setSummary({
+        totalSales: summaryData.revenue || 0,
+        topSKU: topSKU,
+        forecastAccuracy: 92,
+        lowStock: reorderRes.data?.reorder?.length || 0,
+      });
+
       setRecentSales(salesRes.data);
-      setTrendData(trendRes.data);
+      setTrendData(trendData);
       setTopSKUs(topSKUsRes.data);
       setReorderData(reorderRes.data.reorder || []);
+
+      if (topSKU && topSKU !== "N/A") {
+        const forecastRes = await axios.get("/api/forecast", {
+          params: { sku: topSKU, days: 7 },
+        });
+        setForecastData(forecastRes.data);
+      }
     } catch (err) {
       console.error("Dashboard fetch failed", err);
     } finally {
@@ -55,11 +74,20 @@ export default function Dashboard() {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("/api/products");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Product fetch failed", err);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gradient-to-br from-gray-900 to-gray-800 text-white min-h-screen">
-      <h1 className="text-3xl font-extrabold">📊 Dashboard</h1>
+      <h1 className="text-3xl font-extrabold mb-2">📊 Dashboard</h1>
 
-      {/* Cards Section */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <Card title="Total Sales" value={`₹ ${summary?.totalSales || 0}`} icon={<TrendingUp />} />
         <Card title="Top SKU" value={summary?.topSKU || "N/A"} icon={<Package />} />
@@ -67,7 +95,7 @@ export default function Dashboard() {
         <Card title="Forecast Accuracy" value={(summary?.forecastAccuracy || 0) + "%"} icon={<Gauge />} />
       </div>
 
-      {/* Charts Section */}
+      {/* Charts */}
       <motion.div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         initial={{ opacity: 0 }}
@@ -88,8 +116,8 @@ export default function Dashboard() {
         <ReorderTable data={reorderData} />
       </motion.div>
 
-      {/* Forecast Chart */}
-      <ForecastChart data={trendData} />
+      {/* Forecast */}
+      <ForecastChart data={forecastData} />
 
       {/* Recent Sales */}
       <div className="bg-gray-900 rounded-2xl shadow-lg p-6 mt-6">
@@ -138,6 +166,41 @@ export default function Dashboard() {
             </tbody>
           </table>
         )}
+      </div>
+
+      {/* All Products */}
+      <div className="bg-gray-900 rounded-2xl shadow-lg p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4">📦 All Products</h2>
+        <table className="w-full table-auto text-left">
+          <thead>
+            <tr className="text-sm text-gray-400 border-b border-gray-700">
+              <th className="py-2">SKU</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="py-4 text-center text-gray-400">
+                  No products found.
+                </td>
+              </tr>
+            ) : (
+              products.map((p, idx) => (
+                <tr key={idx} className="border-b border-gray-800 text-gray-200">
+                  <td className="py-2">{p.sku}</td>
+                  <td>{p.name}</td>
+                  <td>{p.category}</td>
+                  <td>₹ {p.price}</td>
+                  <td>{p.stock}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

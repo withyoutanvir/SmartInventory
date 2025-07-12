@@ -4,20 +4,20 @@ import {
 
 export default function ForecastChart({ data }) {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold mb-4">📉 Forecast vs Actual Sales</h2>
+    <div className="bg-gray-800 p-4 rounded-xl shadow-lg">
+      <h2 className="text-white text-lg font-semibold mb-4">📉 Forecast vs Actual</h2>
       {data?.length === 0 ? (
-        <p className="text-gray-500">No forecast data available.</p>
+        <p className="text-gray-400">No forecast data available.</p>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis dataKey="date" stroke="#ccc" />
+            <YAxis stroke="#ccc" />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="actual" stroke="#32CD32" strokeWidth={2} name="Actual" />
-            <Line type="monotone" dataKey="predicted" stroke="#FF7F50" strokeWidth={2} name="Predicted" />
+            <Line type="monotone" dataKey="actual" stroke="#00FF7F" strokeWidth={2} name="Actual" />
+            <Line type="monotone" dataKey="predicted" stroke="#FFA07A" strokeWidth={2} name="Predicted" />
           </LineChart>
         </ResponsiveContainer>
       )}

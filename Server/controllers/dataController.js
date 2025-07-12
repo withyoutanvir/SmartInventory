@@ -8,21 +8,21 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Save uploaded CSV to /data
-const storeCSVFile = async (file) => {
+// ✅ Save CSV buffer (from multer) to disk
+const saveCSVToDisk = async (buffer) => {
   const filePath = path.join(__dirname, '../data/sales.csv');
-  await file.mv(filePath); // Overwrites existing file
+  fs.writeFileSync(filePath, buffer); // Save file from memory
   return filePath;
 };
 
-// Upload CSV and insert validated bills
-export const uploadCSV = async (req, res) => {
+// ✅ Upload CSV: Parse, Insert to MongoDB, Trigger FastAPI
+export const uploadSalesCSV = async (req, res) => {
   try {
-    if (!req.files?.csvFile) {
+    if (!req.file) {
       return res.status(400).json({ error: '❌ CSV file required.' });
     }
 
-    const filePath = await storeCSVFile(req.files.csvFile);
+    const filePath = await saveCSVToDisk(req.file.buffer);
     const parsedData = await parseCSV(filePath);
 
     const validData = [];
@@ -50,11 +50,13 @@ export const uploadCSV = async (req, res) => {
       validData.push({
         timestamp: parsedDate,
         total: prc * qty,
-        items: [{
-          sku,
-          quantity: qty,
-          price: prc
-        }]
+        items: [
+          {
+            sku,
+            quantity: qty,
+            price: prc,
+          },
+        ],
       });
     }
 
@@ -64,7 +66,7 @@ export const uploadCSV = async (req, res) => {
 
     await Bill.insertMany(validData);
 
-    
+    // ✅ Trigger FastAPI model retraining
     try {
       await axios.get('http://localhost:8000/train');
     } catch (trainErr) {
@@ -73,17 +75,16 @@ export const uploadCSV = async (req, res) => {
 
     res.status(201).json({
       message: '✅ CSV uploaded and stored.',
-      inserted: validData.length,
-      skipped
+      count: validData.length,
+      skipped,
     });
-
   } catch (error) {
     console.error('❌ Upload Error:', error.message);
     res.status(500).json({ error: 'Failed to process CSV.' });
   }
 };
 
-// Get 5 most recent sales
+// ✅ Get 5 most recent sales
 export const getRecentSales = async (req, res) => {
   try {
     const recentBills = await Bill.find().sort({ timestamp: -1 }).limit(5);
@@ -94,7 +95,7 @@ export const getRecentSales = async (req, res) => {
   }
 };
 
-// Get all sales with optional filters
+// ✅ Get all sales with optional filters
 export const getSalesData = async (req, res) => {
   try {
     const filter = {};
@@ -102,7 +103,7 @@ export const getSalesData = async (req, res) => {
     if (req.query.startDate && req.query.endDate) {
       filter.timestamp = {
         $gte: new Date(req.query.startDate),
-        $lte: new Date(req.query.endDate)
+        $lte: new Date(req.query.endDate),
       };
     }
 
@@ -114,7 +115,7 @@ export const getSalesData = async (req, res) => {
   }
 };
 
-// Get unique SKUs from all bills
+// ✅ Get unique SKUs from all bills
 export const getSKUList = async (req, res) => {
   try {
     const skus = await Bill.distinct('items.sku');
@@ -125,7 +126,7 @@ export const getSKUList = async (req, res) => {
   }
 };
 
-// Delete all bills
+// ✅ Delete all bills
 export const deleteAllBills = async (req, res) => {
   try {
     await Bill.deleteMany({});

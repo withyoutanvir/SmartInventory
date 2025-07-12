@@ -1,0 +1,11 @@
+date,sku,quantity,price
+01-07-2024,Smart TV,90,100
+02-07-2024,Air Fryer,5,150
+03-07-2024,Vaccum,2,200
+04-07-2024,fan,10,50
+,bananas,4,120
+06-07-2024,,5,110
+07-07-2024,clothes,3,130
+InvalidDate,bedsheet,2,90
+08-07-2024,doormat,6,100
+09-07-2024,chilli,1,300
