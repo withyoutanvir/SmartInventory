@@ -7,8 +7,8 @@ export default function UploadPage() {
 
   const { triggerRefresh } = useDataRefresh();
 
-  // 👉 Update to target your Express backend
-  const BACKEND_URL = "http://localhost:5000"; 
+  // ✅ Automatically picks from .env or .env.development
+  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -28,7 +28,7 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile); // must match multer's field name
+    formData.append("file", selectedFile); // must match multer's .single("file")
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/data/upload`, {
@@ -41,7 +41,7 @@ export default function UploadPage() {
         const countText = json.count ? ` (${json.count} rows)` : "";
         setMessage(`✅ ${json.message}${countText}`);
         setSelectedFile(null);
-        triggerRefresh(); // 🔁 trigger dashboard refresh
+        triggerRefresh(); // 🔁 refresh dashboard data
       } else {
         const errorText = await res.text();
         setMessage(`❌ Upload failed. ${errorText}`);
