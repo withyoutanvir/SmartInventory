@@ -21,16 +21,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    console.log('📦 Submitting login to:', `${API_URL}/auth/login`);
-    console.log('🧾 Payload:', form);
+    console.log(' Submitting login to:', `${API_URL}/auth/login`);
+    console.log(' Payload:', form);
 
     try {
       const res = await axios.post(`${API_URL}/auth/login`, form);
-      console.log('✅ Login success:', res.data);
+      console.log(' Login success:', res.data);
       localStorage.setItem('token', res.data.token);
       navigate('/dashboard');
     } catch (err) {
-      console.error('❌ Login error:', err);
+      console.error(' Login error:', err);
       setError(err.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
