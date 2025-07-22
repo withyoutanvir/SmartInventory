@@ -6,7 +6,7 @@ export default function UploadPage() {
   const [message, setMessage] = useState("");
   const { triggerRefresh } = useDataRefresh();
 
-  // ✅ Load API URL from environment (.env)
+  // Load API URL from environment (.env)
   const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleFileUpload = (e) => {
@@ -16,18 +16,18 @@ export default function UploadPage() {
       setMessage("");
     } else {
       setSelectedFile(null);
-      setMessage("❌ Please upload a valid CSV file.");
+      setMessage(" Please upload a valid CSV file.");
     }
   };
 
   const handleSubmit = async () => {
     if (!selectedFile) {
-      setMessage("⚠️ No file selected.");
+      setMessage(" No file selected.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile); // 🔁 must match multer.single('file')
+    formData.append("file", selectedFile); //  must match multer.single('file')
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/analytics/upload-csv`, {
@@ -40,21 +40,21 @@ export default function UploadPage() {
         const countText = json.trend?.length
           ? ` (${json.trend.length} entries)`
           : "";
-        setMessage(`✅ CSV uploaded successfully${countText}`);
+        setMessage(` CSV uploaded successfully${countText}`);
         setSelectedFile(null);
         triggerRefresh(); 
       } else {
         const errorText = await res.text();
-        setMessage(`❌ Upload failed. ${errorText}`);
+        setMessage(` Upload failed. ${errorText}`);
       }
     } catch (error) {
-      setMessage("❌ Upload failed. Check your server connection.");
+      setMessage(" Upload failed. Check your server connection.");
     }
   };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">📤 Upload CSV to Inventory System</h1>
+      <h1 className="text-2xl font-bold mb-4"> Upload CSV to Inventory System</h1>
 
       <input
         type="file"
