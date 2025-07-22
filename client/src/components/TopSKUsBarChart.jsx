@@ -17,7 +17,7 @@ export default function TopSKUsBarChart({ data }) {
 
   return (
     <div className="bg-gray-900 p-4 rounded-xl shadow-lg">
-      <h2 className="text-white text-lg font-semibold mb-4">🏆 Top 5 Selling SKUs</h2>
+      <h2 className="text-white text-lg font-semibold mb-4"> Top 5 Selling SKUs</h2>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={transformedData}
