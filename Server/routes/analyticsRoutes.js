@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-// ✅ Use in-memory storage
+//  Use in-memory storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -19,7 +19,7 @@ router.get('/top-skus', getTopSKUs);
 router.get('/daily-sales', getDailySales);
 router.get('/summary', getSummary);
 
-// ✅ This will pass `req.file.buffer` to controller
+//  This will pass `req.file.buffer` to controller
 router.post('/upload-csv', upload.single('file'), uploadCSVAndParse);
 
 export default router;
