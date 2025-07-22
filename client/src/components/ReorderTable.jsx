@@ -7,7 +7,7 @@ export default function ReorderTable({ data }) {
 
   return (
     <div className="bg-gray-900 p-4 rounded-xl shadow-lg mt-6">
-      <h2 className="text-white text-lg font-semibold mb-4">📦 Reorder Suggestions</h2>
+      <h2 className="text-white text-lg font-semibold mb-4"> Reorder Suggestions</h2>
       {data.length === 0 ? (
         <p className="text-gray-400">All stock levels look good.</p>
       ) : (
