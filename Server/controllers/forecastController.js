@@ -56,10 +56,10 @@ export const getForecast = async (req, res) => {
   }
 };
 
-//  GET /api/forecast/reorder
+
 export const getReorderSuggestions = async (req, res) => {
   try {
-    // 1. Aggregate total sold per SKU
+   
     const sold = await Bill.aggregate([
       { $unwind: "$items" },
       {
@@ -75,10 +75,7 @@ export const getReorderSuggestions = async (req, res) => {
       soldMap[item._id] = item.totalSold;
     });
 
-    // 2. Get product info
     const products = await Product.find();
-
-    // 3. Identify reorder needs
     const reorder = products
       .filter(p => (soldMap[p.sku] || 0) > p.min_stock_level)
       .map(p => ({
