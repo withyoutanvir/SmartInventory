@@ -29,9 +29,9 @@ model = None
 if os.path.exists(MODEL_PATH):
     try:
         model = joblib.load(MODEL_PATH)
-        print("✅ Model loaded successfully.")
+        print(" Model loaded successfully.")
     except Exception as e:
-        print(f"⚠️ Failed to load existing model: {e}")
+        print(f" Failed to load existing model: {e}")
         model = None
 
 # Save model to disk
@@ -42,7 +42,7 @@ def save_model(model):
 # Root route
 @app.get("/")
 def root():
-    return {"message": "✅ AI microservice is running"}
+    return {"message": " AI microservice is running"}
 
 # Train model from CSV
 @app.get("/train")
@@ -69,7 +69,7 @@ def train():
         global model
         model = new_model
 
-        return {"message": "✅ Model trained and saved", "rows_used": len(df_grouped)}
+        return {"message": " Model trained and saved", "rows_used": len(df_grouped)}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Training failed: {str(e)}")
@@ -78,7 +78,7 @@ def train():
 @app.get("/predict")
 def predict(sku: str = Query(...), days: int = Query(7)):
     if not model:
-        raise HTTPException(status_code=503, detail="⚠️ Model not trained yet.")
+        raise HTTPException(status_code=503, detail="⚠ Model not trained yet.")
 
     future = model.make_future_dataframe(periods=days)
     forecast = model.predict(future)
@@ -98,7 +98,7 @@ class StockRequest(BaseModel):
 @app.post("/reorder")
 def reorder(data: StockRequest):
     if not model:
-        raise HTTPException(status_code=503, detail="⚠️ Model not trained yet.")
+        raise HTTPException(status_code=503, detail=" Model not trained yet.")
 
     future = model.make_future_dataframe(periods=data.days)
     forecast = model.predict(future)
@@ -114,7 +114,7 @@ def reorder(data: StockRequest):
 @app.get("/forecast_accuracy")
 def forecast_accuracy():
     if not model:
-        raise HTTPException(status_code=503, detail="⚠️ Model not trained.")
+        raise HTTPException(status_code=503, detail=" Model not trained.")
 
     df = pd.read_csv(DATA_PATH)
     df = df.dropna(subset=['date', 'quantity'])
@@ -169,7 +169,7 @@ async def upload_file(file: UploadFile = File(...)):
         global model
         model = new_model
 
-        return {"message": "✅ File uploaded and model retrained", "count": len(df_grouped)}
+        return {"message": " File uploaded and model retrained", "count": len(df_grouped)}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
